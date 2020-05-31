@@ -29,7 +29,6 @@ float k = 0.1;
 void setup() {
   Serial.begin(9600);
 
-  // https://acdc.foxylab.com/node/49
   sbi(ADCSRA, ADPS2);
   cbi(ADCSRA, ADPS1);
   sbi(ADCSRA, ADPS0);
@@ -44,12 +43,12 @@ void setup() {
 void analyzeAudio() {
   for (int i = 0; i < FHT_N; i++) {
     int sample = analogRead(AUDIO_IN);
-    fht_input[i] = sample; // put real data into bins
+    fht_input[i] = sample;
   }
-  fht_window();  // window the data for better frequency response
-  fht_reorder(); // reorder the data before doing the fht
-  fht_run();     // process the data in the fht
-  fht_mag_log(); // take the output of the fht
+  fht_window();
+  fht_reorder();
+  fht_run();
+  fht_mag_log();
 }
 
 void loop() {
@@ -65,24 +64,19 @@ void loop() {
       int posLevel = map(value, LOW_PASS, gain, 0, SCREEN_HEIGHT - 1);
       posLevel = constrain(posLevel, 0, SCREEN_HEIGHT - 1);
       
-  //      Serial.print(value);
-  //      Serial.print(" ");
       canvas.drawVLine(curBin, SCREEN_HEIGHT - posLevel, SCREEN_HEIGHT);
   
       if (value > maxValue) maxValue = value;
       maxValue_f = maxValue * k + maxValue_f * (1 - k);
-      if (millis() - gainTimer > 1500) {      // каждые 1500 мс
-        // если максимальное значение больше порога, взять его как максимум для отображения
+      if (millis() - gainTimer > 1500) {
         if (maxValue_f > VOL_THR) {
           gain = maxValue_f;
         } else {
-          // если нет, то взять порог побольше, чтобы шумы вообще не проходили
           gain = 100;
         }
         gainTimer = millis();
       }
     }
     canvas.blt(0, 0);
-    //Serial.println("");
   }
 }
